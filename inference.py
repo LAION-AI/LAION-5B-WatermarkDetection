@@ -85,8 +85,8 @@ def load_model(device):
 
     # Load model weights
     state_dict = torch.load('./model.pt')['weights']
-    model.load_state_dict(state_dict).eval().to(device)
-    model.eval()
+    model.load_state_dict(state_dict)
+    model.eval().to(device)
 
     return model, transforms
 
