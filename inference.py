@@ -15,14 +15,14 @@ def inference(device, args):
     Load the model, initialize DDP, and run inference.
     """
     WORLD_SIZE = int(os.environ['WORLD_SIZE'])
-    WORLD_RANK = int(os.environ['WORLD_RANK'])
+    NODE_RANK = int(os.environ['NODE_RANK'])
     MASTER_ADDR = os.environ['MASTER_ADDR']
-    RANK = WORLD_RANK * torch.cuda.device_count() + device
+    RANK = NODE_RANK * torch.cuda.device_count() + device
     torch.distributed.init_process_group(
         backend='nccl',
         world_size=WORLD_SIZE,
         rank=RANK,
-        init_method=MASTER_ADDR
+        init_method="env://"
     )
 
     model, transforms = load_model(device)
