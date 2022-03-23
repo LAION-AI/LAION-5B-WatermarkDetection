@@ -16,32 +16,25 @@ def inference(device, args):
     """
     WORLD_SIZE = int(os.environ['WORLD_SIZE'])
     NODE_RANK = int(os.environ['NODE_RANK'])
-    MASTER_ADDR = os.environ['MASTER_ADDR']
     RANK = NODE_RANK * torch.cuda.device_count() + device
-    torch.distributed.init_process_group(
-        backend='nccl',
-        world_size=WORLD_SIZE,
-        rank=RANK,
-        init_method="env://"
-    )
 
     model, transforms = load_model(device)
 
     # Get webdataset
-    urls = list(braceexpand(args.urls))
-    dataset = wds.ShardList(urls, splitter=wds.split_by_worker, nodesplitter=wds.split_by_node, shuffle=False)
+    urls = list(braceexpand(args.urls))[NODE_RANK::WORLD_SIZE]
     dataset = create_webdataset(
         dataset,
         transforms,
         enable_metadata=True,
     ).batch(args.batch_size, partial=True)
     dataloader = wds.WebLoader(
-        dataset, batch_size=None, shuffle=False, num_workers=8,
+        dataset, batch_size=args.batch_size, shuffle=False, num_workers=8,
     )
     dataloader.num_batches = args.num_samples // (WORLD_SIZE * args.batch_size)
     dataloader.num_samples = dataloader.num_batches * (WORLD_SIZE * args.batch_size)
 
     # Run inference
+    tqdm = lambda x: x if RANK == 0 else tqdm
     current_samples = []
     for batch in tqdm(dataloader):
         img = batch['image_tensor'].to(device)

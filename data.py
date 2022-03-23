@@ -6,6 +6,9 @@ from torch.utils.data import DataLoader
 from torch.utils.data.dataloader import default_collate
 import io
 
+import webdataset as wds
+from webdataset.shardlists import IterableDataset, Composable, ShardSample, SimpleShardSample
+
 
 def folder_to_keys(folder, enable_text=True, enable_image=True, enable_metadata=False):
     """returns a list of keys from a folder of images and text"""
@@ -120,7 +123,6 @@ def create_webdataset(
     input_sampler=lambda a: a,
 ):
     """Create a WebDataset reader, it can read a webdataset of image, text and json"""
-    import webdataset as wds  # pylint: disable=import-outside-toplevel
 
     urls = input_sampler(urls)
 
