@@ -28,7 +28,7 @@ def inference(device, args):
         enable_metadata=True,
     ).batch(args.batch_size)
     dataloader = wds.WebLoader(
-        dataset, batch_size=None, shuffle=False, num_workers=8,
+        dataset, batch_size=None, shuffle=False, num_workers=8, collate_fn=collate
     )
     dataloader.num_batches = args.num_samples // (WORLD_SIZE * args.batch_size)
     dataloader.num_samples = dataloader.num_batches * (WORLD_SIZE * args.batch_size)
@@ -49,10 +49,10 @@ def inference(device, args):
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
             df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-            df.to_parquet(f'{WORLD_RANK}.parquet')
+            df.to_parquet(f'{RANK}.parquet')
             current_samples = []            
     df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-    df.to_parquet(f'{WORLD_RANK}.parquet')
+    df.to_parquet(f'{RANK}.parquet')
 
 
 def load_model(device):
@@ -81,6 +81,14 @@ def load_model(device):
     model.eval().to(device)
 
     return model, transforms
+
+def collate(arr):
+    keys = arr[0].keys()
+    ret_dict = {}
+    for k in keys:
+        ret_dict[k] = [x[k] for x in arr]
+        if k == 'image_tensor':
+            ret_dict[k] = torch.stack(ret_dict[k])
 
 def compute_hash(url, text):
   if url is None:
