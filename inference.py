@@ -23,12 +23,12 @@ def inference(device, args):
     # Get webdataset
     urls = list(braceexpand(args.urls))[NODE_RANK::WORLD_SIZE]
     dataset = create_webdataset(
-        dataset,
+        urls,
         transforms,
         enable_metadata=True,
     ).batch(args.batch_size, partial=True)
     dataloader = wds.WebLoader(
-        dataset, batch_size=args.batch_size, shuffle=False, num_workers=8,
+        dataset, batch_size=None, shuffle=False, num_workers=8,
     )
     dataloader.num_batches = args.num_samples // (WORLD_SIZE * args.batch_size)
     dataloader.num_samples = dataloader.num_batches * (WORLD_SIZE * args.batch_size)

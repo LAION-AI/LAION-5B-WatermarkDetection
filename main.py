@@ -16,7 +16,7 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--urls', type=str, help='file urls')
-    parser.add_argument('--dataset-size', type=int, help='number of pairs')
+    parser.add_argument('--num-samples', type=int, help='number of pairs')
     parser.add_argument('--batch-size', type=int, help='samples per batch')
     return parser.parse_args()
 
