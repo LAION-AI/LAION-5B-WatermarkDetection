@@ -65,9 +65,9 @@ def create_webdataset(
 
     dataset = wds.WebDataset(urls, cache_dir=cache_path, cache_size=10 ** 10, handler=wds.handlers.warn_and_continue)
 
-    filter_dataset = partial(filter_dataset, enable_text=enable_text, enable_image=enable_image, enable_metadata=enable_metadata, caption_key=caption_key, image_key=image_key)
-    filtered_dataset = dataset.select(filter_dataset)
+    filter_fn = partial(filter_dataset, enable_text=enable_text, enable_image=enable_image, enable_metadata=enable_metadata, caption_key=caption_key, image_key=image_key)
+    filtered_dataset = dataset.select(filter_fn)
 
-    preprocess_dataset = partial(preprocess_dataset, enable_image=enable_image, enable_text=enable_text, enable_metadata=enable_metadata, image_key=image_key, caption_key=caption_key, image_transform=image_transform)
-    transformed_dataset = filtered_dataset.map(preprocess_dataset, handler=wds.handlers.warn_and_continue)
+    preprocess_fn = partial(preprocess_dataset, enable_image=enable_image, enable_text=enable_text, enable_metadata=enable_metadata, image_key=image_key, caption_key=caption_key, image_transform=image_transform)
+    transformed_dataset = filtered_dataset.map(preprocess_fn, handler=wds.handlers.warn_and_continue)
     return transformed_dataset
