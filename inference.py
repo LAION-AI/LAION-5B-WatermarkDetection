@@ -34,7 +34,7 @@ def inference(device, args):
     dataloader.num_samples = dataloader.num_batches * (WORLD_SIZE * args.batch_size)
 
     # Run inference
-    tqdm = lambda x: x if RANK == 0 else tqdm
+    tqdm = (lambda x: x) if RANK == 0 else tqdm
     current_samples = []
     for batch in tqdm(dataloader):
         img = batch['image_tensor'].to(device)
