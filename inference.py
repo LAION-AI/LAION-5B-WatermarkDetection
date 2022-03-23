@@ -26,7 +26,7 @@ def inference(device, args):
         urls,
         transforms,
         enable_metadata=True,
-    ).batch(args.batch_size, partial=True)
+    ).batch(args.batch_size)
     dataloader = wds.WebLoader(
         dataset, batch_size=None, shuffle=False, num_workers=8,
     )
@@ -34,9 +34,8 @@ def inference(device, args):
     dataloader.num_samples = dataloader.num_batches * (WORLD_SIZE * args.batch_size)
 
     # Run inference
-    tqdm = (lambda x: x) if RANK == 0 else tqdm
     current_samples = []
-    for batch in tqdm(dataloader):
+    for batch in dataloader:
         img = batch['image_tensor'].to(device)
         with torch.no_grad():
             out = model(img)
