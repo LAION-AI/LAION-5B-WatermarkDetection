@@ -89,6 +89,8 @@ def collate(arr):
         ret_dict[k] = [x[k] for x in arr]
         if k == 'image_tensor':
             ret_dict[k] = torch.stack(ret_dict[k])
+    
+    return ret_dict
 
 def compute_hash(url, text):
   if url is None:
