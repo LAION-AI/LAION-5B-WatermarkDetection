@@ -97,7 +97,7 @@ def statistics_to_array(out, batch):
         output.append([
             out[i][0].item(),
             out[i][1].item(),
-            compute_hash(json.loads(batch['metadata'][i])['url'], batch['text'])
+            compute_hash(json.loads(batch['metadata'][i])['url'], batch['text'][i])
         ])
     return output
 
