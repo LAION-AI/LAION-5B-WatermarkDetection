@@ -24,7 +24,7 @@ def inference(device, args):
     model, transforms = load_model(device)
 
     # Get webdataset
-    urls = list(braceexpand(args.urls))[NODE_RANK::WORLD_SIZE]
+    urls = list(braceexpand(args.urls))[RANK::WORLD_SIZE]
     dataset = create_webdataset(
         urls,
         transforms,
@@ -97,7 +97,7 @@ def statistics_to_array(out, batch):
         output.append([
             out[i][0].item(),
             out[i][1].item(),
-            compute_hash(json.loads(batch['metadata'][i])['url'], batch['text'][i])
+            compute_hash(json.loads(batch['metadata'][i]).get('url'), batch['text'][i])
         ])
     return output
 
