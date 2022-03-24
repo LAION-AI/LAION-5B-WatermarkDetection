@@ -1,3 +1,5 @@
+from numpy import append
+from rsa import compute_hash
 import torch
 import torch.nn as nn
 import torchvision.transforms as T
@@ -40,8 +42,7 @@ def inference(device, args):
         with torch.no_grad():
             out = model(img)
             out = torch.nn.functional.softmax(out, dim=1)
-        current_samples.extend(
-            [[out[i][0].item(), out[i][1].item(), compute_hash(batch['metadata']['url'][i], batch['text'][i])] for i in range(len(out))])
+        current_samples.extend(statistics_to_array(out, batch))
 
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
@@ -88,6 +89,16 @@ def collate(arr):
             ret_dict[k] = torch.stack(ret_dict[k])
     
     return ret_dict
+
+def statistics_to_array(out, batch):
+    output = []
+    for i in range(len(batch['image_tensor'])):
+        output.append([
+            out[i][0].item(),
+            out[i][1].item(),
+            compute_hash(batch['url'][i], batch['text'])
+        ])
+    return output
 
 def compute_hash(url, text):
   if url is None:
