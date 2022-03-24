@@ -41,10 +41,7 @@ def inference(device, args):
             out = model(img)
             out = torch.nn.functional.softmax(out, dim=1)
         current_samples.extend(
-            [[out[i][0].item(),
-            out[i][1].item(),
-            compute_hash(batch['metadata']['url'][i], batch['text'][i])]
-            for i in range(len(out))])
+            [[out[i][0].item(), out[i][1].item(), compute_hash(batch['metadata']['url'][i], batch['text'][i])] for i in range(len(out))])
 
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
