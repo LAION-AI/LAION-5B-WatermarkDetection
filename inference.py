@@ -8,6 +8,7 @@ import pandas as pd
 import timm
 import mmh3
 import os
+import json
 from braceexpand import braceexpand
 from data import create_webdataset
 from tqdm import tqdm
@@ -96,7 +97,7 @@ def statistics_to_array(out, batch):
         output.append([
             out[i][0].item(),
             out[i][1].item(),
-            compute_hash(batch['url'][i], batch['text'])
+            compute_hash(json.loads(batch['metadata'][i])['url'], batch['text'])
         ])
     return output
 
