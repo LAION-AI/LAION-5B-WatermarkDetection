@@ -1,3 +1,5 @@
+from ast import arg
+import imp
 from numpy import append
 from rsa import compute_hash
 import torch
@@ -9,6 +11,8 @@ import timm
 import mmh3
 import os
 import json
+import fsspec
+import uuid
 from braceexpand import braceexpand
 from data import create_webdataset
 from tqdm import tqdm
@@ -48,10 +52,12 @@ def inference(device, args):
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
             df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-            df.to_parquet(f'{RANK}.parquet')
+            with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4()) + '.parquet'), 'wb') as f:
+                df.to_parquet(f)
             current_samples = []            
     df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-    df.to_parquet(f'{RANK}.parquet')
+    with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4()) + '.parquet'), 'wb') as f:
+        df.to_parquet(f)
 
 
 def load_model(device):

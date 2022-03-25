@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument('--urls', type=str, help='file urls')
     parser.add_argument('--num-samples', type=int, help='number of pairs')
     parser.add_argument('--batch-size', type=int, help='samples per batch')
+    parser.add_argument('--bucket_dir', type=str, help='bucket directory')
     return parser.parse_args()
 
 if __name__ == '__main__':
