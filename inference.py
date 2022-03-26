@@ -26,6 +26,7 @@ def inference(device, args):
     RANK = NODE_RANK * torch.cuda.device_count() + device
 
     model, transforms = load_model(device)
+    fs, output_folder = fsspec.core.url_to_fs(args.bucket_dir)
 
     # Get webdataset
     urls = list(braceexpand(args.urls))[RANK::WORLD_SIZE]
@@ -54,13 +55,13 @@ def inference(device, args):
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
             df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-            with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4())) + '.parquet', 'wb') as f:
+            with fs.open(os.path.join(output_folder, str(uuid.uuid4())) + '.parquet', 'wb') as f:
                 df.to_parquet(f)
             current_samples = []            
         if device == 0:
             pbar.update(WORLD_SIZE * args.batch_size)
     df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
-    with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4())) + '.parquet', 'wb') as f:
+    with fs.open(os.path.join(output_folder, str(uuid.uuid4())) + '.parquet', 'wb') as f:
         df.to_parquet(f)
     if device == 0:
         pbar.close()
