@@ -55,7 +55,7 @@ def inference(device, args):
         current_samples.extend(statistics_to_array(out, batch))
 
         # Save current samples to parquet
-        if len(current_samples) >= int(1e6):  
+        if len(current_samples) >= int(1e5):  
             df = pd.DataFrame(current_samples, columns=['pwatermark', 'hash'])
             df['pwatermark'] = df['pwatermark'].astype("float32")
             with fs.open(os.path.join(output_folder, str(uuid.uuid4())) + '.parquet', 'wb') as f:
