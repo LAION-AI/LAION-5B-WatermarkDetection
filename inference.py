@@ -42,6 +42,8 @@ def inference(device, args):
 
     # Run inference
     current_samples = []
+    if RANK == 0:
+        pbar = tqdm(total=dataloader.num_samples)
     for batch in dataloader:
         img = batch['image_tensor'].to(device)
         with torch.no_grad():
@@ -55,9 +57,13 @@ def inference(device, args):
             with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4()) + '.parquet'), 'wb') as f:
                 df.to_parquet(f)
             current_samples = []            
+        if RANK == 0:
+            pbar.update(WORLD_SIZE * args.batch_size)
     df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
     with fsspec.open(os.path.join(args.bucket_dir, str(uuid.uuid4()) + '.parquet'), 'wb') as f:
         df.to_parquet(f)
+    if RANK == 0:
+        pbar.close()
 
 
 def load_model(device):
