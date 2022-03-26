@@ -56,13 +56,15 @@ def inference(device, args):
 
         # Save current samples to parquet
         if len(current_samples) >= int(1e6):  
-            df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
+            df = pd.DataFrame(current_samples, columns=['pwatermark', 'hash'])
+            df['pwatermark'] = df['pwatermark'].astype("float32")
             with fs.open(os.path.join(output_folder, str(uuid.uuid4())) + '.parquet', 'wb') as f:
                 df.to_parquet(f)
             current_samples = []            
         if device == 0:
             pbar.update(WORLD_SIZE * args.batch_size)
-    df = pd.DataFrame(current_samples, columns=['P Watermark', 'P Clean', 'hash'])
+    df = pd.DataFrame(current_samples, columns=['pwatermark', 'hash'])
+    df['pwatermark'] = df['pwatermark'].astype("float32")
     with fs.open(os.path.join(output_folder, str(uuid.uuid4())) + '.parquet', 'wb') as f:
         df.to_parquet(f)
     if device == 0:
@@ -111,7 +113,6 @@ def statistics_to_array(out, batch):
     for i in range(len(batch['image_tensor'])):
         output.append([
             out[i][0].item(),
-            out[i][1].item(),
             compute_hash(json.loads(batch['metadata'][i]).get('url'), batch['text'][i])
         ])
     return output
