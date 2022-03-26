@@ -26,7 +26,9 @@ def inference(device, args):
     RANK = NODE_RANK * torch.cuda.device_count() + device
 
     model, transforms = load_model(device)
-    fs, output_folder = fsspec.core.url_to_fs(args.bucket_dir)
+    fs, output_folder = fsspec.core.url_to_fs(args.bucket_dir,
+        client_kwargs={"endpoint_url":"https://bucket.vpce-06aadfc9fc5aabd58-bv32itci.s3.us-east-1.vpce.amazonaws.com/"})
+    output_folder += '/'
 
     # Get webdataset
     urls = list(braceexpand(args.urls))[RANK::WORLD_SIZE]
