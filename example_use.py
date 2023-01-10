@@ -34,7 +34,7 @@ if __name__ == '__main__':
         nn.Linear(in_features=256, out_features=2),
     )
 
-    state_dict = torch.load('models/watermark_model_v1.pt.pt')
+    state_dict = torch.load('models/watermark_model_v1.pt')
 
     model.load_state_dict(state_dict)
     model.eval()
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     if torch.cuda.is_available():
         model.cuda()
     
-    watermark_im = preprocessing(Image.open('./images/watermark_example.png'))
-    clear_im = preprocessing(Image.open('./images/clear_example.png'))
+    watermark_im = preprocessing(Image.open('./images/watermark_example.png').convert('RGB'))
+    clear_im = preprocessing(Image.open('./images/clear_example.png').convert('RGB'))
 
     batch = torch.stack([watermark_im, clear_im])
 
